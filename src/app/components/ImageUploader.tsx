@@ -69,9 +69,14 @@ export default function ImageUploader() {
         body: formData,
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
       const result = await response.json();
 
-      if (response.ok) {
+      if (result.success) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -88,6 +93,7 @@ export default function ImageUploader() {
         throw new Error(result.error || 'Unknown error');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       alert(`Failed to send data. Please try again. Error: ${error.message}`);
     } finally {
       setIsSending(false);
