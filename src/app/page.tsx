@@ -2,7 +2,7 @@ import Recorder from './components/Recorder';
 import SingleFileUploader from './components/SingleFileUploader';
 import FileUploader from './components/FileUploader';
 import VoiceRecorderUploader from './components/VoiceRecorderUploader';
-import ImageUploader from './components/ImageUploader';
+// import ImageUploader from './components/ImageUploader';
 
 export default function Home() {
   return (
@@ -32,9 +32,9 @@ export default function Home() {
         </div>
 
         {/* ImageUploader Component */}
-        <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
+        {/* <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
           <ImageUploader />
-        </div>
+        </div> */}
       </main>
     </div>
   );
