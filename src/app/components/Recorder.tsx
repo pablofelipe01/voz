@@ -169,7 +169,7 @@ export default function Recorder() {
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Portal</h1>
+      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Voice & Image</h1>
 
      {/* Email Input */}
 <div className="mb-5">
@@ -218,9 +218,9 @@ export default function Recorder() {
           accept="image/*"
           onChange={handlePhotoUpload}
         />
-        <button className="bg-green-500 text-white py-2 px-4 rounded-md">
+        {/* <button className="bg-green-500 text-white py-2 px-4 rounded-md">
           📸 Take Photo
-        </button>
+        </button> */}
       </div>
 
       {/* Photo Preview */}
