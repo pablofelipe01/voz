@@ -64,7 +64,9 @@ export default function ImageUploader() {
       formData.append('imageName', imageName);
       formData.append('file', file, imageName); // Use the custom image name
 
-      const response = await fetch('/api/upload-image', {
+      // Use an absolute URL here
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/upload-image`;
+      const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });
