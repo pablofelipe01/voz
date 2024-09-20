@@ -3,6 +3,7 @@ import SingleFileUploader from './components/SingleFileUploader';
 import FileUploader from './components/FileUploader';
 import VoiceRecorderUploader from './components/VoiceRecorderUploader';
 import Turismo from './components/Turismo';
+import Inmobiliarios from './components/Inmobiliarios';
 
 export default function Home() {
   return (
@@ -34,6 +35,9 @@ export default function Home() {
         {/* ImageUploader Component */}
         <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
           <Turismo />
+        </div>
+        <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
+          <Inmobiliarios />
         </div>
       </main>
     </div>

@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
 
     const fileUrl = sharedLinkResponse.result.url.replace('?dl=0', '?raw=1');
 
-    if (!process.env.MAKE_WEBHOOK_URL_2) {
-      console.error('MAKE_WEBHOOK_URL_2 is not defined');
+    if (!process.env.MAKE_WEBHOOK_URL_INM) {
+      console.error('MAKE_WEBHOOK_URL_INM is not defined');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const response = await fetch(process.env.MAKE_WEBHOOK_URL_2, {
+    const response = await fetch(process.env.MAKE_WEBHOOK_URL_INM, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -3,27 +3,20 @@
 import { useState } from 'react';
 import confetti from 'canvas-confetti';
 
-export default function FileUploader() {
-  const [files, setFiles] = useState<File[]>([]);
+export default function Inmobiliarios() {
+  const [file, setFile] = useState<File | null>(null);
   const [email, setEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles) {
-      const filesArray = Array.from(selectedFiles);
-
-      if (filesArray.length + files.length > 2) {
-        alert('You can only upload 2 files.');
-        return;
-      }
-
-      setFiles((prevFiles) => [...prevFiles, ...filesArray]);
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
     }
   };
 
-  const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  const removeFile = () => {
+    setFile(null);
   };
 
   const startDropboxAuth = () => {
@@ -31,8 +24,8 @@ export default function FileUploader() {
   };
 
   const sendData = async () => {
-    if (files.length !== 2) {
-      alert('Please upload exactly 2 files before sending.');
+    if (!file) {
+      alert('Please upload a file before sending.');
       return;
     }
 
@@ -46,12 +39,9 @@ export default function FileUploader() {
     try {
       const formData = new FormData();
       formData.append('email', email);
+      formData.append('file', file);
 
-      files.forEach((file) => {
-        formData.append('files', file, file.name);
-      });
-
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload-Inmobiliario', {
         method: 'POST',
         body: formData,
       });
@@ -64,8 +54,8 @@ export default function FileUploader() {
           spread: 70,
           origin: { y: 0.6 },
         });
-        alert('Data sent successfully!');
-        setFiles([]);
+        alert('File uploaded successfully!');
+        setFile(null);
         setEmail('');
       } else if (response.status === 401) {
         // Not authenticated, start Dropbox auth
@@ -100,9 +90,8 @@ export default function FileUploader() {
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">2 File Uploader</h1>
+      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Inmuebles</h1>
 
-      {/* Email Input */}
       <div className="mb-5">
         <input
           type="email"
@@ -113,45 +102,37 @@ export default function FileUploader() {
         />
       </div>
 
-      {/* File Input */}
       <div className="mb-5 text-sm text-gray-600">
         <input
           type="file"
-          multiple
           accept=".pdf,.doc,.docx,.txt"
           onChange={handleFileChange}
           className="w-full"
         />
-        <p className="text-sm text-gray-600 mt-1">You must upload exactly 2 files.</p>
+        <p className="text-sm text-gray-600 mt-1">Please upload a single file.</p>
       </div>
 
-      {/* File List */}
-      {files.length > 0 && (
+      {file && (
         <div className="mb-5">
-          <h2 className="text-lg  text-gray-600 font-semibold mb-2">Selected Files:</h2>
-          <ul className="list-disc list-inside  text-gray-600">
-            {files.map((file, index) => (
-              <li key={index} className="flex justify-between items-center  text-gray-600">
-                <span>{file.name}</span>
-                <button
-                  onClick={() => removeFile(index)}
-                  className="text-red-500 hover:underline text-sm"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
+          <h2 className="text-lg text-gray-600 font-semibold mb-2">Selected File:</h2>
+          <div className="flex justify-between items-center text-gray-600">
+            <span>{file.name}</span>
+            <button
+              onClick={removeFile}
+              className="text-red-500 hover:underline text-sm"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Send Button */}
       <button
         onClick={sendData}
         className="w-full bg-indigo-500 text-white py-3 rounded-md flex justify-center"
-        disabled={isSending || files.length !== 2}
+        disabled={isSending || !file}
       >
-        {isSending ? <span>Sending...</span> : <span>Send Data</span>}
+        {isSending ? <span>Sending...</span> : <span>Upload File</span>}
       </button>
     </div>
   );

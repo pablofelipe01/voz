@@ -74,8 +74,21 @@ export default function SingleFileUploader() {
     }
   };
 
+  const reloadPage = () => {
+    window.location.reload();
+  };
+
   return (
     <div>
+      {/* Home Icon for Reload */}
+      <div className="text-center mb-5">
+        <button onClick={reloadPage} className="text-blue-800">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-9-5v12m12 0h-3m-6 0h-3m9-7v7" />
+          </svg>
+        </button>
+      </div>
+
       <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Single File Uploader</h1>
 
       <div className="mb-5">
