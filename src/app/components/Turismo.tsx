@@ -169,7 +169,7 @@ export default function Turismo() {
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Turismo & Image</h1>
+      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Turismo</h1>
 
      {/* Email Input */}
 <div className="mb-5">

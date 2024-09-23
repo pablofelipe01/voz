@@ -4,6 +4,7 @@ import FileUploader from './components/FileUploader';
 import VoiceRecorderUploader from './components/VoiceRecorderUploader';
 import Turismo from './components/Turismo';
 import Inmobiliarios from './components/Inmobiliarios';
+import VoiceRecorder from './components/VoiceRecorder';
 
 export default function Home() {
   return (
@@ -38,6 +39,9 @@ export default function Home() {
         </div>
         <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
           <Inmobiliarios />
+        </div>
+        <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
+          <VoiceRecorder />
         </div>
       </main>
     </div>

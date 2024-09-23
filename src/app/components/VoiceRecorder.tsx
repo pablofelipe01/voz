@@ -3,18 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 
-export default function Recorder() {
+export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [email, setEmail] = useState(''); // State to hold the email address
+  const [number, setNumber] = useState(''); // State to hold the number input
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
-  const photoInputRef = useRef<HTMLInputElement | null>(null);
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
 
@@ -89,48 +86,33 @@ export default function Recorder() {
     }
   };
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setPhoto(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreviewUrl(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const sendData = async () => {
-    if (!audioBlob && !photo) {
-      alert('Please record audio or upload/take a photo before sending.');
+    if (!audioBlob) {
+      alert('Please record audio before sending.');
       return;
     }
-  
-    if (!email) {
-      alert('Please provide an email address.');
+
+    if (!number) {
+      alert('Please provide a number.');
       return;
     }
-  
+
     setIsSending(true);
-  
+
     const formData = new FormData();
-    formData.append('email', email); // Add email to the FormData
+    formData.append('number', number); // Add number to the FormData
     if (audioBlob) {
       formData.append('audio', audioBlob, 'recording.ogg');
     }
-    if (photo) {
-      formData.append('photo', photo, photo.name);
-    }
 
     try {
-      const response = await fetch('https://hook.us2.make.com/dcbiojm7xqdoyuwjuctg66pdbcds03i7', {
+      const response = await fetch('https://hook.us2.make.com/d25xit2x5iwnj4wf2z5cdf8v62lygwxe', {
         method: 'POST',
         body: formData,
       });
-  
+
       const responseText = await response.text();
-  
+
       if (response.ok) {
         confetti({
           particleCount: 100,
@@ -139,9 +121,7 @@ export default function Recorder() {
         });
         alert('Data sent successfully!');
         setAudioBlob(null);
-        setPhoto(null);
-        setEmail('');
-        setPhotoPreviewUrl(null);
+        setNumber('');
         if (audioPreviewRef.current) audioPreviewRef.current.style.display = 'none';
       } else {
         throw new Error(`Server responded with status: ${response.status}. Response: ${responseText}`);
@@ -169,19 +149,18 @@ export default function Recorder() {
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Arte</h1>
+      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Voice Recorder</h1>
 
-     {/* Email Input */}
-<div className="mb-5">
-  <input
-    type="email"
-    placeholder="Enter your email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    className="w-full border border-gray-300 p-2 rounded-md text-gray-900" // Added text color class
-  />
-</div>
-
+      {/* Number Input */}
+      <div className="mb-5">
+        <input
+          type="number"
+          placeholder="Enter your number"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          className="w-full border border-gray-300 p-2 rounded-md text-gray-900" // Added text color class
+        />
+      </div>
 
       {/* Recording Wave Animation */}
       <div className="flex justify-center items-center mb-5">
@@ -198,37 +177,14 @@ export default function Recorder() {
       </div>
 
       {/* Record/Stop Button */}
-      <div className="flex justify-between mb-5">
+      <div className="flex justify-center mb-5">
         <button
           onClick={toggleRecording}
           className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
         >
           {isRecording ? '⏹ Stop' : '🎤 Record'}
         </button>
-        <button
-          onClick={() => photoInputRef.current?.click()}
-          className="bg-blue-500 text-white py-2 px-4 rounded-md"
-        >
-          📷 Upload
-        </button>
-        <input
-          type="file"
-          ref={photoInputRef}
-          style={{ display: 'none' }}
-          accept="image/*"
-          onChange={handlePhotoUpload}
-        />
-        {/* <button className="bg-green-500 text-white py-2 px-4 rounded-md">
-          📸 Take Photo
-        </button> */}
       </div>
-
-      {/* Photo Preview */}
-      {photoPreviewUrl && (
-        <div className="mb-5">
-          <img src={photoPreviewUrl} alt="Photo preview" className="w-full rounded-md" />
-        </div>
-      )}
 
       {/* Audio Preview */}
       <audio ref={audioPreviewRef} controls className={`w-full ${audioBlob ? '' : 'hidden'} mb-5`}></audio>
@@ -247,9 +203,6 @@ export default function Recorder() {
         <div className="text-center">
           <div className="mb-2 text-blue-800">
             Audio Status: {audioBlob ? '✅ Recorded' : '❌ Not recorded'}
-          </div>
-          <div className="mb-2 text-blue-800">
-            Photo Status: {photo ? '✅ Uploaded' : '❌ Not uploaded'}
           </div>
         </div>
       </div>
