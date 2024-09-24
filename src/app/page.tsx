@@ -5,6 +5,7 @@ import VoiceRecorderUploader from './components/VoiceRecorderUploader';
 import Turismo from './components/Turismo';
 import Inmobiliarios from './components/Inmobiliarios';
 import VoiceRecorder from './components/VoiceRecorder';
+import ArtRecorder from './components/ArtRecorder';
 
 export default function Home() {
   return (
@@ -42,6 +43,9 @@ export default function Home() {
         </div>
         <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
           <VoiceRecorder />
+        </div>
+        <div className="bg-white bg-opacity-80 rounded-2xl shadow-lg w-full p-5">
+          <ArtRecorder />
         </div>
       </main>
     </div>
