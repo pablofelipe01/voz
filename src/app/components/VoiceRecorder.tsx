@@ -149,7 +149,7 @@ export default function VoiceRecorder() {
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Voice Recorder</h1>
+      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Data</h1>
 
       {/* Number Input */}
       <div className="mb-5">
