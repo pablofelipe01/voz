@@ -106,7 +106,7 @@ export default function VoiceRecorder() {
     }
 
     try {
-      const response = await fetch('https://hook.us2.make.com/d25xit2x5iwnj4wf2z5cdf8v62lygwxe', {
+      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
         method: 'POST',
         body: formData,
       });
