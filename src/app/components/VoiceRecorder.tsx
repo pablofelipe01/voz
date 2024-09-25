@@ -6,7 +6,6 @@ import confetti from 'canvas-confetti';
 export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [number, setNumber] = useState(''); // State to hold the number input
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
@@ -59,6 +58,7 @@ export default function VoiceRecorder() {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
         audioPreviewRef.current.style.display = 'block';
       }
+      sendData(blob); // Automatically send data after stopping recording
     };
     recorder.start();
   };
@@ -86,24 +86,16 @@ export default function VoiceRecorder() {
     }
   };
 
-  const sendData = async () => {
-    if (!audioBlob) {
+  const sendData = async (blob: Blob) => {
+    if (!blob) {
       alert('Please record audio before sending.');
-      return;
-    }
-
-    if (!number) {
-      alert('Please provide a number.');
       return;
     }
 
     setIsSending(true);
 
     const formData = new FormData();
-    formData.append('number', number); // Add number to the FormData
-    if (audioBlob) {
-      formData.append('audio', audioBlob, 'recording.ogg');
-    }
+    formData.append('audio', blob, 'recording.ogg');
 
     try {
       const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
@@ -121,8 +113,8 @@ export default function VoiceRecorder() {
         });
         alert('Data sent successfully!');
         setAudioBlob(null);
-        setNumber('');
         if (audioPreviewRef.current) audioPreviewRef.current.style.display = 'none';
+        reloadPage(); // Reload the page after sending data
       } else {
         throw new Error(`Server responded with status: ${response.status}. Response: ${responseText}`);
       }
@@ -139,29 +131,6 @@ export default function VoiceRecorder() {
 
   return (
     <div>
-      {/* Home Icon for Reload */}
-      <div className="text-center mb-5">
-        <button onClick={reloadPage} className="text-blue-800">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-9-5v12m12 0h-3m-6 0h-3m9-7v7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Title */}
-      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Data</h1>
-
-      {/* Number Input */}
-      <div className="mb-5">
-        <input
-          type="number"
-          placeholder="Enter your number"
-          value={number}
-          onChange={(e) => setNumber(e.target.value)}
-          className="w-full border border-gray-300 p-2 rounded-md text-gray-900" // Added text color class
-        />
-      </div>
-
       {/* Recording Wave Animation */}
       <div className="flex justify-center items-center mb-5">
         <div className="flex space-x-1 h-20">
@@ -181,6 +150,7 @@ export default function VoiceRecorder() {
         <button
           onClick={toggleRecording}
           className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
+          disabled={isSending}
         >
           {isRecording ? '⏹ Stop' : '🎤 Record'}
         </button>
@@ -189,19 +159,10 @@ export default function VoiceRecorder() {
       {/* Audio Preview */}
       <audio ref={audioPreviewRef} controls className={`w-full ${audioBlob ? '' : 'hidden'} mb-5`}></audio>
 
-      {/* Send Button */}
-      <button
-        onClick={sendData}
-        className="w-full bg-indigo-500 text-white py-3 rounded-md flex justify-center"
-        disabled={isSending}
-      >
-        {isSending ? <span>Sending...</span> : <span>Send Data</span>}
-      </button>
-
       {/* Status Messages */}
       <div className="flex justify-center items-center mb-5">
         <div className="text-center">
-          <div className="mb-2 text-blue-800">
+          <div className="mb-2 text-white-800">
             Audio Status: {audioBlob ? '✅ Recorded' : '❌ Not recorded'}
           </div>
         </div>
