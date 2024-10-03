@@ -1,4 +1,5 @@
 import VoiceRecorder from './components/VoiceRecorder';
+import PesoBiochar from './components/PesoBiochar';
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
         {/* VoiceRecorderUploader Component */}
         <div className="rounded-2xl shadow-lg w-full p-5">
           <VoiceRecorder />
+          <PesoBiochar />
         </div>
       </main>
     </div>

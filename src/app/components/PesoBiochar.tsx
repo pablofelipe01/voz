@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 
-export default function VoiceRecorder() {
+export default function PesoBiochar() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -98,7 +98,7 @@ export default function VoiceRecorder() {
     formData.append('audio', blob, 'recording.ogg');
 
     try {
-      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
+      const response = await fetch('https://hook.us2.make.com/wxpxhrhg3qgim71xteampkaw2sg4vmaw', {
         method: 'POST',
         body: formData,
       });
@@ -149,10 +149,10 @@ export default function VoiceRecorder() {
       <div className="flex justify-center mb-5">
         <button
           onClick={toggleRecording}
-          className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
+          className={`${isRecording ? 'bg-red-600' : 'bg-green-500'} text-white py-2 px-4 rounded-md`}
           disabled={isSending}
         >
-          {isRecording ? '⏹ Stop' : '🎤 Record'}
+          {isRecording ? '⏹ Stop' : 'Peso Bio'}
         </button>
       </div>
 
