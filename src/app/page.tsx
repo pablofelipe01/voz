@@ -1,6 +1,7 @@
 import VoiceRecorder from './components/VoiceRecorder';
 import PesoBiochar from './components/PesoBiochar';
 import Observaciones from './components/Observaciones';
+import TurnoFinal from './components/TurnoFinal';
 
 export default function Home() {
   return (
@@ -27,6 +28,10 @@ export default function Home() {
         <div className="border-2 border-gray-300 rounded-lg shadow-2xl p-5 bg-white text-blue-900 transform transition-transform hover:scale-105">
           {/* <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2> */}
           <Observaciones />
+        </div>
+        <div className="border-2 border-gray-300 rounded-lg shadow-2xl p-5 bg-white text-blue-900 transform transition-transform hover:scale-105">
+          {/* <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2> */}
+          <TurnoFinal />
         </div>
       </main>
     </div>
