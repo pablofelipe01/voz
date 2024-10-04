@@ -145,19 +145,28 @@ export default function VoiceRecorder() {
     <div>
       {/* Name Selection */}
       <div className="flex justify-center mb-5">
-  <select
-    value={selectedName}
-    onChange={(e) => setSelectedName(e.target.value)}
-    className="py-2 px-4 rounded-md border bg-gray-800 text-white"
-  >
-    <option value="" disabled className="text-gray-400">Operador</option>
-    <option value="Mario Barrera" className="text-black">Mario Barrera</option>
-    <option value="Kevin Avila" className="text-black">Kevin Avila</option>
-    <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
-    <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
-  </select>
-</div>
+        <select
+          value={selectedName}
+          onChange={(e) => setSelectedName(e.target.value)}
+          className="py-2 px-4 rounded-md border bg-gray-800 text-white"
+        >
+          <option value="" disabled className="text-gray-400">Operador</option>
+          <option value="Mario Barrera" className="text-black">Mario Barrera</option>
+          <option value="Kevin Avila" className="text-black">Kevin Avila</option>
+          <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
+          <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
+        </select>
+      </div>
 
+      {/* Instructions */}
+      <div className="mb-5 text-center text-blue-900">
+        <h3 className="text-lg font-semibold">Instrucciones:</h3>
+        <ul className="list-disc list-inside">
+          <li>Consumo de gas Inicial</li>
+          <li>Comentario de Apertura</li>
+          <li>Estado de Animo</li>
+        </ul>
+      </div>
 
       {/* Recording Wave Animation */}
       <div className="flex justify-center items-center mb-5">

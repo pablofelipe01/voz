@@ -19,13 +19,13 @@ export default function Home() {
         
         {/* PesoBiochar Frame with 3D shadow effect */}
         <div className="border-2 border-gray-300 rounded-lg shadow-2xl p-5 mb-5 bg-white text-blue-900 transform transition-transform hover:scale-105">
-          <h2 className="text-xl font-semibold mb-4 text-center">Peso Biochar</h2>
+          {/* <h2 className="text-xl font-semibold mb-4 text-center">Peso Biochar</h2> */}
           <PesoBiochar />
         </div>
         
         {/* Observaciones Frame with 3D shadow effect */}
         <div className="border-2 border-gray-300 rounded-lg shadow-2xl p-5 bg-white text-blue-900 transform transition-transform hover:scale-105">
-          <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2>
+          {/* <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2> */}
           <Observaciones />
         </div>
       </main>
