@@ -36,9 +36,8 @@ export default function VoiceRecorder() {
   };
 
   const startRecording = (stream: MediaStream) => {
-    setTimeout(() => {
     setIsRecording(true);
-    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    const recorder = new MediaRecorder(stream);
     setMediaRecorder(recorder);
 
     const context = new AudioContext();
@@ -54,7 +53,7 @@ export default function VoiceRecorder() {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/webm' });
+      const blob = new Blob(chunks, { type: 'audio/mp3' });
       setAudioBlob(blob);
       if (audioPreviewRef.current) {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
@@ -62,7 +61,6 @@ export default function VoiceRecorder() {
       }
     };
     recorder.start();
-    }, 500);
   };
 
   const stopRecording = () => {
@@ -104,7 +102,7 @@ export default function VoiceRecorder() {
     const formData = new FormData();
     formData.append('number', number); // Add number to the FormData
     if (audioBlob) {
-      formData.append('audio', audioBlob, 'recording.webm');
+      formData.append('audio', audioBlob, 'recording.mp3');
     }
 
     try {
