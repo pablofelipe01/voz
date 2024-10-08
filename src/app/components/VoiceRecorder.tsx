@@ -10,7 +10,7 @@ export default function VoiceRecorder() {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [selectedName, setSelectedName] = useState(''); // New state variable for selected name
+  const [selectedName, setSelectedName] = useState('');
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
@@ -42,7 +42,7 @@ export default function VoiceRecorder() {
 
   const startRecording = (stream: MediaStream) => {
     setIsRecording(true);
-    const recorder = new MediaRecorder(stream);
+    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm; codecs=opus' });
     setMediaRecorder(recorder);
 
     const context = new AudioContext();
@@ -58,7 +58,7 @@ export default function VoiceRecorder() {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+      const blob = new Blob(chunks, { type: 'audio/webm' });
       setAudioBlob(blob);
       if (audioPreviewRef.current) {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
@@ -106,8 +106,8 @@ export default function VoiceRecorder() {
     setIsSending(true);
 
     const formData = new FormData();
-    formData.append('audio', blob, 'recording.ogg');
-    formData.append('name', selectedName); // Append selected name to form data
+    formData.append('audio', blob, 'recording.webm');
+    formData.append('name', selectedName);
 
     try {
       const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
@@ -126,7 +126,7 @@ export default function VoiceRecorder() {
         alert('Data sent successfully!');
         setAudioBlob(null);
         if (audioPreviewRef.current) audioPreviewRef.current.style.display = 'none';
-        reloadPage(); // Reload the page after sending data
+        reloadPage();
       } else {
         throw new Error(`Server responded with status: ${response.status}. Response: ${responseText}`);
       }
