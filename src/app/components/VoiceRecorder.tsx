@@ -53,7 +53,7 @@ export default function VoiceRecorder() {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+      const blob = new Blob(chunks, { type: 'audio/mp3' });
       setAudioBlob(blob);
       if (audioPreviewRef.current) {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
@@ -102,7 +102,7 @@ export default function VoiceRecorder() {
     const formData = new FormData();
     formData.append('number', number); // Add number to the FormData
     if (audioBlob) {
-      formData.append('audio', audioBlob, 'recording.ogg');
+      formData.append('audio', audioBlob, 'recording.mp3');
     }
 
     try {
