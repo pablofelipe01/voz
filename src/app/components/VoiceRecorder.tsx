@@ -41,7 +41,15 @@ export default function VoiceRecorder() {
     const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm; codecs=opus' });
     setMediaRecorder(recorder);
 
-    const context = new AudioContext();
+    let context;
+    try {
+      context = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+      console.error("Web Audio API is not supported in this browser", e);
+      alert("Web Audio API is not supported in this browser.");
+      return;
+    }
+
     const analyserNode = context.createAnalyser();
     const source = context.createMediaStreamSource(stream);
     source.connect(analyserNode);
