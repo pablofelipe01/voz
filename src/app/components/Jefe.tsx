@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 
-export default function VoiceRecorder() {
+export default function Jefe() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [selectedName, setSelectedName] = useState(''); // New state variable for selected name
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
@@ -22,11 +21,6 @@ export default function VoiceRecorder() {
   }, [isRecording, analyser, dataArray]);
 
   const toggleRecording = async () => {
-    if (!selectedName) {
-      alert('Please select a name before recording.');
-      return;
-    }
-
     if (!isRecording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -98,19 +92,13 @@ export default function VoiceRecorder() {
       return;
     }
 
-    if (!selectedName) {
-      alert('Please select a name before sending.');
-      return;
-    }
-
     setIsSending(true);
 
     const formData = new FormData();
     formData.append('audio', blob, 'recording.ogg');
-    formData.append('name', selectedName); // Append selected name to form data
 
     try {
-      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
+      const response = await fetch('https://hook.us2.make.com/ffwfumd5bzppjii1fsma4e746u7xtw9b', {
         method: 'POST',
         body: formData,
       });
@@ -143,31 +131,6 @@ export default function VoiceRecorder() {
 
   return (
     <div>
-      {/* Name Selection */}
-      <div className="flex justify-center mb-5">
-        <select
-          value={selectedName}
-          onChange={(e) => setSelectedName(e.target.value)}
-          className="py-2 px-4 rounded-md border bg-gray-800 text-white"
-        >
-          <option value="" disabled className="text-gray-400">Operador</option>
-          <option value="Mario Barrera" className="text-black">Mario Barrera</option>
-          <option value="Kevin Avila" className="text-black">Kevin Avila</option>
-          <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
-          <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
-        </select>
-      </div>
-
-      {/* Instructions */}
-      <div className="mb-5 text-center text-blue-900">
-        <h3 className="text-lg font-semibold">Instrucciones:</h3>
-        <ul className="list-disc list-inside">
-          <li>Buenos días en alegría</li>
-          <li>Comentario de Apertura</li>
-          <li>Consumo de gas Inicial</li>
-        </ul>
-      </div>
-
       {/* Recording Wave Animation */}
       <div className="flex justify-center items-center mb-5">
         <div className="flex space-x-1 h-20">
@@ -186,10 +149,10 @@ export default function VoiceRecorder() {
       <div className="flex justify-center mb-5">
         <button
           onClick={toggleRecording}
-          className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
+          className={`${isRecording ? 'bg-red-600' : 'bg-green-500'} text-white py-2 px-4 rounded-md`}
           disabled={isSending}
         >
-          {isRecording ? '⏹ Stop' : '🎤 Inicio Turno'}
+          {isRecording ? '⏹ Stop' : 'Bitacora Jefe'}
         </button>
       </div>
 

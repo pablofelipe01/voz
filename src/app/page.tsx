@@ -2,6 +2,8 @@ import VoiceRecorder from './components/VoiceRecorder';
 import PesoBiochar from './components/PesoBiochar';
 import Observaciones from './components/Observaciones';
 import TurnoFinal from './components/TurnoFinal';
+import ViajeBiomasa from './components/ViajeBiomasa';
+import Jefe from './components/Jefe';
 
 export default function Home() {
   return (
@@ -29,10 +31,21 @@ export default function Home() {
           {/* <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2> */}
           <Observaciones />
         </div>
+        <div className="border-2 border-gray-300 rounded-lg shadow-2xl p-6 bg-gradient-to-b from-white to-gray-100 text-blue-900 transform transition-transform hover:scale-105 hover:shadow-3xl">
+  <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">Viaje Biomasa</h2>
+  <ViajeBiomasa />
+</div>
+
+<div className="border-2 border-gray-300 rounded-lg shadow-2xl p-5 bg-white text-blue-900 transform transition-transform hover:scale-105">
+          {/* <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2> */}
+          < Jefe />
+        </div>
         <div className="border-2 border-gray-300 rounded-lg shadow-2xl p-5 bg-white text-blue-900 transform transition-transform hover:scale-105">
           {/* <h2 className="text-xl font-semibold mb-4 text-center">Observaciones</h2> */}
           <TurnoFinal />
         </div>
+
+
       </main>
     </div>
   );

@@ -152,7 +152,7 @@ export default function Observaciones() {
           className={`${isRecording ? 'bg-red-600' : 'bg-green-500'} text-white py-2 px-4 rounded-md`}
           disabled={isSending}
         >
-          {isRecording ? '⏹ Stop' : 'Observaciones'}
+          {isRecording ? '⏹ Stop' : 'Bitacora'}
         </button>
       </div>
 

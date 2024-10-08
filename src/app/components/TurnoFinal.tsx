@@ -163,9 +163,9 @@ export default function TurnoFinal() {
         <h3 className="text-lg font-semibold">Instrucciones:</h3>
         <ul className="list-disc list-inside">
           <li>Hertz</li>
-          <li>Comentario Final</li>
           <li>Consumo de gas final</li>
           <li>Peso x minuto</li>
+          <li>Comentario Final</li>
         </ul>
       </div>
 
