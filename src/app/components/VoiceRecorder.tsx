@@ -11,7 +11,6 @@ export default function VoiceRecorder() {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [selectedName, setSelectedName] = useState('');
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
@@ -38,18 +37,10 @@ export default function VoiceRecorder() {
 
   const startRecording = (stream: MediaStream) => {
     setIsRecording(true);
-    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm; codecs=opus' });
+    const recorder = new MediaRecorder(stream);
     setMediaRecorder(recorder);
 
-    let context;
-    try {
-      context = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) {
-      console.error("Web Audio API is not supported in this browser", e);
-      alert("Web Audio API is not supported in this browser.");
-      return;
-    }
-
+    const context = new AudioContext();
     const analyserNode = context.createAnalyser();
     const source = context.createMediaStreamSource(stream);
     source.connect(analyserNode);
@@ -62,7 +53,7 @@ export default function VoiceRecorder() {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/webm' });
+      const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
       setAudioBlob(blob);
       if (audioPreviewRef.current) {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
@@ -101,11 +92,6 @@ export default function VoiceRecorder() {
       return;
     }
 
-    if (!selectedName) {
-      alert('Please select a name before sending.');
-      return;
-    }
-
     if (!number) {
       alert('Please provide a number.');
       return;
@@ -114,12 +100,13 @@ export default function VoiceRecorder() {
     setIsSending(true);
 
     const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.webm');
-    formData.append('name', selectedName);
     formData.append('number', number); // Add number to the FormData
+    if (audioBlob) {
+      formData.append('audio', audioBlob, 'recording.ogg');
+    }
 
     try {
-      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
+      const response = await fetch('https://hook.us2.make.com/d25xit2x5iwnj4wf2z5cdf8v62lygwxe', {
         method: 'POST',
         body: formData,
       });
@@ -161,20 +148,8 @@ export default function VoiceRecorder() {
         </button>
       </div>
 
-      {/* Name Selection */}
-      <div className="flex justify-center mb-5">
-        <select
-          value={selectedName}
-          onChange={(e) => setSelectedName(e.target.value)}
-          className="py-2 px-4 rounded-md border bg-gray-800 text-white"
-        >
-          <option value="" disabled className="text-gray-400">Operador</option>
-          <option value="Mario Barrera" className="text-black">Mario Barrera</option>
-          <option value="Kevin Avila" className="text-black">Kevin Avila</option>
-          <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
-          <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
-        </select>
-      </div>
+      {/* Title */}
+      <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Data</h1>
 
       {/* Number Input */}
       <div className="mb-5">
@@ -183,18 +158,8 @@ export default function VoiceRecorder() {
           placeholder="Enter your number"
           value={number}
           onChange={(e) => setNumber(e.target.value)}
-          className="w-full border border-gray-300 p-2 rounded-md text-gray-900"
+          className="w-full border border-gray-300 p-2 rounded-md text-gray-900" // Added text color class
         />
-      </div>
-
-      {/* Instructions */}
-      <div className="mb-5 text-center text-blue-900">
-        <h3 className="text-lg font-semibold">Instrucciones:</h3>
-        <ul className="list-disc list-inside">
-          <li>Buenos días en alegría</li>
-          <li>Comentario de Apertura</li>
-          <li>Consumo de gas Inicial</li>
-        </ul>
       </div>
 
       {/* Recording Wave Animation */}
@@ -216,9 +181,8 @@ export default function VoiceRecorder() {
         <button
           onClick={toggleRecording}
           className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
-          disabled={isSending}
         >
-          {isRecording ? '⏹ Stop' : '🎤 Inicio Turno'}
+          {isRecording ? '⏹ Stop' : '🎤 Record'}
         </button>
       </div>
 
@@ -237,7 +201,7 @@ export default function VoiceRecorder() {
       {/* Status Messages */}
       <div className="flex justify-center items-center mb-5">
         <div className="text-center">
-          <div className="mb-2 text-white-800">
+          <div className="mb-2 text-blue-800">
             Audio Status: {audioBlob ? '✅ Recorded' : '❌ Not recorded'}
           </div>
         </div>
