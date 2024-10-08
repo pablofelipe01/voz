@@ -52,7 +52,7 @@ export default function PesoBiochar() {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+      const blob = new Blob(chunks, { type: 'audio/mp3' });
       setAudioBlob(blob);
       if (audioPreviewRef.current) {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
@@ -95,7 +95,7 @@ export default function PesoBiochar() {
     setIsSending(true);
 
     const formData = new FormData();
-    formData.append('audio', blob, 'recording.ogg');
+    formData.append('audio', blob, 'recording.mp3');
 
     try {
       const response = await fetch('https://hook.us2.make.com/wxpxhrhg3qgim71xteampkaw2sg4vmaw', {
