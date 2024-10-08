@@ -1,25 +1,20 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {  useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 
 export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [number, setNumber] = useState(''); // State to hold the number input
+  const [number, setNumber] = useState(''); // State to hold the selected operator
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
-  const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
-  const waveBars = useRef<HTMLDivElement[]>([]);
-
-  useEffect(() => {
-    if (isRecording && analyser && dataArray) {
-      animateWaveform();
-    }
-  }, [isRecording, analyser, dataArray]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const requestAnimationFrameRef = useRef<number | null>(null);
 
   const toggleRecording = async () => {
     if (!isRecording) {
@@ -40,15 +35,15 @@ export default function VoiceRecorder() {
     const recorder = new MediaRecorder(stream);
     setMediaRecorder(recorder);
 
-    const context = new AudioContext();
-    const analyserNode = context.createAnalyser();
-    const source = context.createMediaStreamSource(stream);
-    source.connect(analyserNode);
-    analyserNode.fftSize = 256;
-    const bufferLength = analyserNode.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    setDataArray(dataArray);
-    setAnalyser(analyserNode);
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContextRef.current = audioContext;
+
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    analyserRef.current = analyser;
+
+    source.connect(analyser);
 
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
@@ -61,6 +56,7 @@ export default function VoiceRecorder() {
       }
     };
     recorder.start();
+    drawWaveform();
   };
 
   const stopRecording = () => {
@@ -69,21 +65,49 @@ export default function VoiceRecorder() {
       mediaRecorder.stop();
       mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
+    cancelAnimationFrame(requestAnimationFrameRef.current!);
   };
 
-  const animateWaveform = () => {
-    if (!analyser || !dataArray) return;
+  const drawWaveform = () => {
+    const analyser = analyserRef.current;
+    const canvas = canvasRef.current;
+    if (!analyser || !canvas) return;
 
-    analyser.getByteFrequencyData(dataArray);
-    waveBars.current.forEach((bar, i) => {
-      const value = dataArray[i * 2];
-      const percent = value / 255;
-      bar.style.height = `${percent * 100}%`;
-    });
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    const ctx = canvas.getContext("2d");
 
-    if (isRecording) {
-      requestAnimationFrame(animateWaveform);
-    }
+    const draw = () => {
+      requestAnimationFrameRef.current = requestAnimationFrame(draw);
+
+      analyser.getByteTimeDomainData(dataArray);
+
+      ctx!.clearRect(0, 0, canvas.width, canvas.height);
+      ctx!.lineWidth = 2;
+      ctx!.strokeStyle = "rgb(255, 0, 0)";
+
+      ctx!.beginPath();
+      const sliceWidth = (canvas.width * 1.0) / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * canvas.height) / 2;
+
+        if (i === 0) {
+          ctx!.moveTo(x, y);
+        } else {
+          ctx!.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx!.lineTo(canvas.width, canvas.height / 2);
+      ctx!.stroke();
+    };
+
+    draw();
   };
 
   const sendData = async () => {
@@ -93,7 +117,7 @@ export default function VoiceRecorder() {
     }
 
     if (!number) {
-      alert('Please provide a number.');
+      alert('Please select an operator.');
       return;
     }
 
@@ -106,7 +130,7 @@ export default function VoiceRecorder() {
     }
 
     try {
-      const response = await fetch('https://hook.us2.make.com/d25xit2x5iwnj4wf2z5cdf8v62lygwxe', {
+      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
         method: 'POST',
         body: formData,
       });
@@ -151,29 +175,34 @@ export default function VoiceRecorder() {
       {/* Title */}
       <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Data</h1>
 
-      {/* Number Input */}
+      {/* Operator Dropdown */}
       <div className="mb-5">
-        <input
-          type="number"
-          placeholder="Enter your number"
+        <select
           value={number}
           onChange={(e) => setNumber(e.target.value)}
-          className="w-full border border-gray-300 p-2 rounded-md text-gray-900" // Added text color class
-        />
+          className="w-full border border-gray-300 p-2 rounded-md text-gray-900"
+        >
+          <option value="" disabled className="text-gray-400">Operador</option>
+          <option value="Mario Barrera" className="text-black">Mario Barrera</option>
+          <option value="Kevin Avila" className="text-black">Kevin Avila</option>
+          <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
+          <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
+        </select>
       </div>
 
-      {/* Recording Wave Animation */}
+      {/* Recording Wave Canvas */}
       <div className="flex justify-center items-center mb-5">
-        <div className="flex space-x-1 h-20">
-          {Array.from({ length: 32 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-1 bg-gradient-to-t from-red-400 to-red-600 transition-all duration-100 ease-linear"
-              style={{ height: '20%' }}
-              ref={(el) => (waveBars.current[i] = el!)}
-            ></div>
-          ))}
-        </div>
+        <canvas ref={canvasRef} width={300} height={80} className="w-full" />
+      </div>
+
+      {/* Instructions */}
+      <div className="mb-5 text-blue-800">
+        <p>Instrucciones:</p>
+        <ul className="list-disc list-inside">
+          <li>Buenos días en alegría</li>
+          <li>Comentario de Apertura</li>
+          <li>Consumo de gas Inicial</li>
+        </ul>
       </div>
 
       {/* Record/Stop Button */}
