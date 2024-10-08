@@ -106,7 +106,7 @@ export default function VoiceRecorder() {
     }
 
     try {
-      const response = await fetch('https://hook.us2.make.com/d25xit2x5iwnj4wf2z5cdf8v62lygwxe', {
+      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
         method: 'POST',
         body: formData,
       });
@@ -151,15 +151,29 @@ export default function VoiceRecorder() {
       {/* Title */}
       <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Data</h1>
 
-      {/* Number Input */}
+      {/* Operator Dropdown */}
       <div className="mb-5">
-        <input
-          type="number"
-          placeholder="Enter your number"
+        <select
           value={number}
           onChange={(e) => setNumber(e.target.value)}
-          className="w-full border border-gray-300 p-2 rounded-md text-gray-900" // Added text color class
-        />
+          className="w-full border border-gray-300 p-2 rounded-md text-gray-900"
+        >
+          <option value="" disabled className="text-gray-400">Operador</option>
+          <option value="Mario Barrera" className="text-black">Mario Barrera</option>
+          <option value="Kevin Avila" className="text-black">Kevin Avila</option>
+          <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
+          <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
+        </select>
+      </div>
+
+      {/* Instructions */}
+      <div className="mb-5 text-blue-800">
+        <p>Instrucciones:</p>
+        <ul className="list-disc list-inside">
+          <li>Buenos días en alegría</li>
+          <li>Comentario de Apertura</li>
+          <li>Consumo de gas Inicial</li>
+        </ul>
       </div>
 
       {/* Recording Wave Animation */}
