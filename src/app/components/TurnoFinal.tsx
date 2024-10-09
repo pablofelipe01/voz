@@ -10,32 +10,9 @@ export default function TurnoFinal() {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [countdown, setCountdown] = useState(60); // Initialize countdown to 1 minute (60 seconds)
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
-
-  // Timer effect: starts 3 seconds after recording begins
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-    
-    if (isRecording && countdown === 60) {
-      // Delay countdown start by 3 seconds
-      setTimeout(() => {
-        timer = setInterval(() => {
-          setCountdown((prevCountdown) => {
-            if (prevCountdown > 0) return prevCountdown - 1;
-            if (timer) clearInterval(timer);
-            return 0;
-          });
-        }, 1000); // Decrease countdown every second
-      }, 3000); // Start countdown 3 seconds after recording starts
-    }
-
-    return () => {
-      if (timer) clearInterval(timer); // Clean up the timer
-    };
-  }, [isRecording]);
 
   useEffect(() => {
     if (isRecording && analyser && dataArray) {
@@ -48,10 +25,9 @@ export default function TurnoFinal() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         startRecording(stream);
-        setCountdown(60); // Reset the countdown to 1 minute when starting a new recording
-      } catch (err) {
-        console.error("Error accessing microphone:", err);
-        alert("Error accessing microphone. Please ensure you have granted microphone permissions.");
+      } catch (err: unknown) {
+        console.error('Error accessing microphone:', err);
+        alert('Error al acceder al micrófono. Por favor, asegúrate de haber concedido permisos.');
       }
     } else {
       stopRecording();
@@ -82,7 +58,7 @@ export default function TurnoFinal() {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
         audioPreviewRef.current.style.display = 'block';
       }
-      sendData(blob); // Automatically send data after stopping recording
+      sendData(blob); // Enviar datos automáticamente después de detener la grabación
     };
     recorder.start();
   };
@@ -91,7 +67,7 @@ export default function TurnoFinal() {
     setIsRecording(false);
     if (mediaRecorder) {
       mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
     }
   };
 
@@ -112,7 +88,7 @@ export default function TurnoFinal() {
 
   const sendData = async (blob: Blob) => {
     if (!blob) {
-      alert('Please record audio before sending.');
+      alert('Por favor, graba audio antes de enviar.');
       return;
     }
 
@@ -128,7 +104,7 @@ export default function TurnoFinal() {
       });
 
       const responseText = await response.text();
-      console.log('Response from server:', responseText); // Log server response
+      console.log('Response from server:', responseText); // Mostrar respuesta del servidor
 
       if (response.ok) {
         confetti({
@@ -136,16 +112,20 @@ export default function TurnoFinal() {
           spread: 70,
           origin: { y: 0.6 },
         });
-        alert('Data sent successfully!');
+        alert('¡Datos enviados exitosamente!');
         setAudioBlob(null);
         if (audioPreviewRef.current) audioPreviewRef.current.style.display = 'none';
-        reloadPage(); // Reload the page after sending data
+        reloadPage(); // Recargar la página después de enviar los datos
       } else {
-        throw new Error(`Server responded with status: ${response.status}. Response: ${responseText}`);
+        throw new Error(`El servidor respondió con estado: ${response.status}. Respuesta: ${responseText}`);
       }
-    } catch (error) {
-      console.error('Error sending data:', error); // Log more detailed errors
-      alert(`Failed to send data. Please try again. Error: ${error.message}`);
+    } catch (error: unknown) {
+      console.error('Error al enviar datos:', error); // Mostrar errores detallados
+      if (error instanceof Error) {
+        alert(`Error al enviar datos. Por favor, intenta de nuevo. Error: ${error.message}`);
+      } else {
+        alert('Error al enviar datos. Por favor, intenta de nuevo.');
+      }
     } finally {
       setIsSending(false);
     }
@@ -157,24 +137,16 @@ export default function TurnoFinal() {
 
   return (
     <div>
-      {/* Instructions */}
+      {/* Instrucciones */}
       <div className="mb-5 text-center text-blue-900">
         <h3 className="text-lg font-semibold">Instrucciones:</h3>
         <ul className="list-disc list-inside">
-          
           <li>Consumo de gas final</li>
           <li>Comentario Final</li>
         </ul>
       </div>
 
-      {/* Countdown Timer */}
-      {isRecording && (
-        <div className="mb-5 text-center text-red-600">
-          <h3 className="text-lg font-semibold">Tiempo restante: {countdown} segundos</h3>
-        </div>
-      )}
-
-      {/* Recording Wave Animation */}
+      {/* Animación de la onda de grabación */}
       <div className="flex justify-center items-center mb-5">
         <div className="flex space-x-1 h-20">
           {Array.from({ length: 32 }).map((_, i) => (
@@ -188,25 +160,25 @@ export default function TurnoFinal() {
         </div>
       </div>
 
-      {/* Record/Stop Button */}
+      {/* Botón de grabar/detener */}
       <div className="flex justify-center mb-5">
         <button
           onClick={toggleRecording}
           className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
           disabled={isSending}
         >
-          {isRecording ? '⏹ Stop' : '🎤 Finalizar Turno'}
+          {isRecording ? '⏹ Detener' : '🎤 Finalizar Turno'}
         </button>
       </div>
 
-      {/* Audio Preview */}
+      {/* Vista previa de audio */}
       <audio ref={audioPreviewRef} controls className={`w-full ${audioBlob ? '' : 'hidden'} mb-5`}></audio>
 
-      {/* Status Messages */}
+      {/* Mensajes de estado */}
       <div className="flex justify-center items-center mb-5">
         <div className="text-center">
-          <div className="mb-2 text-white-800">
-            Audio Status: {audioBlob ? '✅ Recorded' : '❌ Not recorded'}
+          <div className="mb-2 text-black-800">
+            Estado del audio: {audioBlob ? '✅ Grabado' : '❌ No grabado'}
           </div>
         </div>
       </div>
