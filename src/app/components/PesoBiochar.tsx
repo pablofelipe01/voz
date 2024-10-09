@@ -10,9 +10,36 @@ export default function PesoBiochar() {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [countdown, setCountdown] = useState(60); // Inicializar el cronómetro a 60 segundos
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
+
+  // Efecto para el cronómetro: inicia 3 segundos después de comenzar la grabación
+  useEffect(() => {
+    let timer: number | null = null;
+    let countdownStartTimeout: number | null = null;
+
+    if (isRecording && countdown === 60) {
+      // Retrasar el inicio del cronómetro 3 segundos
+      countdownStartTimeout = window.setTimeout(() => {
+        timer = window.setInterval(() => {
+          setCountdown((prevCountdown) => {
+            if (prevCountdown > 0) return prevCountdown - 1;
+            if (timer !== null) clearInterval(timer);
+            // Detener la grabación automáticamente cuando el cronómetro llega a 0
+            stopRecording();
+            return 0;
+          });
+        }, 1000); // Disminuir el cronómetro cada segundo
+      }, 3000); // Iniciar el cronómetro 3 segundos después de comenzar a grabar
+    }
+
+    return () => {
+      if (timer !== null) clearInterval(timer); // Limpiar el intervalo del cronómetro
+      if (countdownStartTimeout !== null) clearTimeout(countdownStartTimeout); // Limpiar el timeout inicial
+    };
+  }, [isRecording, countdown]);
 
   useEffect(() => {
     if (isRecording && analyser && dataArray) {
@@ -24,8 +51,9 @@ export default function PesoBiochar() {
     if (!isRecording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setCountdown(60); // Reiniciar el cronómetro al iniciar una nueva grabación
         startRecording(stream);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error accessing microphone:', err);
         alert('Error al acceder al micrófono. Por favor, asegúrate de haber concedido permisos.');
       }
@@ -118,7 +146,7 @@ export default function PesoBiochar() {
       } else {
         throw new Error(`El servidor respondió con estado: ${response.status}. Respuesta: ${responseText}`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         alert(`Error al enviar datos. Por favor, intenta de nuevo. Error: ${error.message}`);
       } else {
@@ -144,6 +172,13 @@ export default function PesoBiochar() {
           <li>Peso por minuto</li>
         </ul>
       </div>
+
+      {/* Cronómetro */}
+      {isRecording && (
+        <div className="mb-5 text-center text-red-600">
+          <h3 className="text-lg font-semibold">Tiempo restante: {countdown} segundos</h3>
+        </div>
+      )}
 
       {/* Animación de la onda de grabación */}
       <div className="flex justify-center items-center mb-5">
