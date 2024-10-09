@@ -157,14 +157,12 @@ export default function TurnoFinal() {
 
   return (
     <div>
-
       {/* Instructions */}
       <div className="mb-5 text-center text-blue-900">
         <h3 className="text-lg font-semibold">Instrucciones:</h3>
         <ul className="list-disc list-inside">
-          <li>Hertz</li>
+          
           <li>Consumo de gas final</li>
-          <li>Peso x minuto</li>
           <li>Comentario Final</li>
         </ul>
       </div>

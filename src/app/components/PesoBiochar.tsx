@@ -131,6 +131,16 @@ export default function PesoBiochar() {
 
   return (
     <div>
+      {/* Instructions */}
+      <div className="mb-5 text-center text-blue-900">
+        <h3 className="text-lg font-semibold">Instrucciones:</h3>
+        <ul className="list-disc list-inside">
+          <li>Peso</li>
+          <li>Hertz</li>
+          <li>Peso x minuto</li>
+        </ul>
+      </div>
+
       {/* Recording Wave Animation */}
       <div className="flex justify-center items-center mb-5">
         <div className="flex space-x-1 h-20">
