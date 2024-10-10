@@ -6,14 +6,43 @@ import confetti from 'canvas-confetti';
 export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [number, setNumber] = useState(''); // State to hold the number input
+  const [number, setNumber] = useState(''); // Estado para almacenar el número
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [countdown, setCountdown] = useState(60); // Inicializar el cronómetro a 60 segundos
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
+
+  // Efecto para manejar el cronómetro
+  useEffect(() => {
+    let timer: number | null = null;
+    let countdownStartTimeout: number | null = null;
+
+    if (isRecording && countdown === 60) {
+      // Retrasar el inicio del cronómetro 3 segundos
+      countdownStartTimeout = window.setTimeout(() => {
+        timer = window.setInterval(() => {
+          setCountdown((prevCountdown) => {
+            if (prevCountdown > 0) {
+              return prevCountdown - 1;
+            } else {
+              if (timer !== null) clearInterval(timer);
+              stopRecording(); // Detener la grabación cuando el cronómetro llegue a 0
+              return 0;
+            }
+          });
+        }, 1000); // Decrementar el cronómetro cada segundo
+      }, 3000); // Iniciar el cronómetro después de 3 segundos
+    }
+
+    return () => {
+      if (timer !== null) clearInterval(timer); // Limpiar el temporizador
+      if (countdownStartTimeout !== null) clearTimeout(countdownStartTimeout); // Limpiar el timeout inicial
+    };
+  }, [isRecording, countdown]);
 
   useEffect(() => {
     if (isRecording && analyser && dataArray) {
@@ -25,10 +54,11 @@ export default function VoiceRecorder() {
     if (!isRecording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setCountdown(60); // Reiniciar el cronómetro al iniciar una nueva grabación
         startRecording(stream);
-      } catch (err) {
-        console.error("Error accessing microphone:", err);
-        alert("Error accessing microphone. Please ensure you have granted microphone permissions.");
+      } catch (err: unknown) {
+        console.error('Error accessing microphone:', err);
+        alert('Error al acceder al micrófono. Por favor, asegúrate de haber concedido permisos.');
       }
     } else {
       stopRecording();
@@ -53,7 +83,7 @@ export default function VoiceRecorder() {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/mp3' });
+      const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
       setAudioBlob(blob);
       if (audioPreviewRef.current) {
         audioPreviewRef.current.src = URL.createObjectURL(blob);
@@ -67,7 +97,7 @@ export default function VoiceRecorder() {
     setIsRecording(false);
     if (mediaRecorder) {
       mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
     }
   };
 
@@ -88,21 +118,21 @@ export default function VoiceRecorder() {
 
   const sendData = async () => {
     if (!audioBlob) {
-      alert('Please record audio before sending.');
+      alert('Por favor, graba audio antes de enviar.');
       return;
     }
 
     if (!number) {
-      alert('Please provide a number.');
+      alert('Por favor, selecciona un operador.');
       return;
     }
 
     setIsSending(true);
 
     const formData = new FormData();
-    formData.append('number', number); // Add number to the FormData
+    formData.append('number', number); // Agregar número al FormData
     if (audioBlob) {
-      formData.append('audio', audioBlob, 'recording.mp3');
+      formData.append('audio', audioBlob, 'recording.ogg');
     }
 
     try {
@@ -119,15 +149,19 @@ export default function VoiceRecorder() {
           spread: 70,
           origin: { y: 0.6 },
         });
-        alert('Data sent successfully!');
+        alert('¡Datos enviados exitosamente!');
         setAudioBlob(null);
         setNumber('');
         if (audioPreviewRef.current) audioPreviewRef.current.style.display = 'none';
       } else {
-        throw new Error(`Server responded with status: ${response.status}. Response: ${responseText}`);
+        throw new Error(`El servidor respondió con estado: ${response.status}. Respuesta: ${responseText}`);
       }
-    } catch (error) {
-      alert(`Failed to send data. Please try again. Error: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(`Error al enviar datos. Por favor, intenta de nuevo. Error: ${error.message}`);
+      } else {
+        alert('Error al enviar datos. Por favor, intenta de nuevo.');
+      }
     } finally {
       setIsSending(false);
     }
@@ -139,44 +173,69 @@ export default function VoiceRecorder() {
 
   return (
     <div>
-      {/* Home Icon for Reload */}
+      {/* Icono de Inicio para Recargar */}
       <div className="text-center mb-5">
         <button onClick={reloadPage} className="text-blue-800">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 mx-auto"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-9-5v12m12 0h-3m-6 0h-3m9-7v7" />
           </svg>
         </button>
       </div>
 
-      {/* Title */}
+      {/* Título */}
       <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Data</h1>
 
-      {/* Operator Dropdown */}
+      {/* Selección de Operador */}
       <div className="mb-5">
         <select
           value={number}
           onChange={(e) => setNumber(e.target.value)}
           className="w-full border border-gray-300 p-2 rounded-md text-gray-900"
         >
-          <option value="" disabled className="text-gray-400">Operador</option>
-          <option value="Mario Barrera" className="text-black">Mario Barrera</option>
-          <option value="Kevin Avila" className="text-black">Kevin Avila</option>
-          <option value="Yeison Cogua" className="text-black">Yeison Cogua</option>
-          <option value="Santiago Amaya" className="text-black">Santiago Amaya</option>
+          <option value="" disabled className="text-gray-400">
+            Operador
+          </option>
+          <option value="Mario Barrera" className="text-black">
+            Mario Barrera
+          </option>
+          <option value="Kevin Avila" className="text-black">
+            Kevin Avila
+          </option>
+          <option value="Yeison Cogua" className="text-black">
+            Yeison Cogua
+          </option>
+          <option value="Santiago Amaya" className="text-black">
+            Santiago Amaya
+          </option>
         </select>
       </div>
 
-      {/* Instructions */}
+      {/* Instrucciones */}
       <div className="mb-5 text-blue-800">
-        <p>Instrucciones:</p>
+        <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Instrucciones:</h1>
         <ul className="list-disc list-inside">
-          <li>Buenos días en alegría</li>
-          <li>Comentario de Apertura</li>
+          <li>Saludo</li>
+          <li>Comentario</li>
           <li>Consumo de gas Inicial</li>
+          <li>Hertz</li>
+          <li>Peso por Minuto</li>
         </ul>
       </div>
 
-      {/* Recording Wave Animation */}
+      {/* Cronómetro */}
+      {isRecording && (
+        <div className="mb-5 text-center text-red-600">
+          <h3 className="text-lg font-semibold">Tiempo restante: {countdown} segundos</h3>
+        </div>
+      )}
+
+      {/* Animación de la onda de grabación */}
       <div className="flex justify-center items-center mb-5">
         <div className="flex space-x-1 h-20">
           {Array.from({ length: 32 }).map((_, i) => (
@@ -190,33 +249,34 @@ export default function VoiceRecorder() {
         </div>
       </div>
 
-      {/* Record/Stop Button */}
+      {/* Botón de grabar/detener */}
       <div className="flex justify-center mb-5">
         <button
           onClick={toggleRecording}
           className={`${isRecording ? 'bg-red-600' : 'bg-red-500'} text-white py-2 px-4 rounded-md`}
+          disabled={isSending}
         >
-          {isRecording ? '⏹ Stop' : '🎤 Record'}
+          {isRecording ? '⏹ Detener' : '🎤 Grabar'}
         </button>
       </div>
 
-      {/* Audio Preview */}
+      {/* Vista previa de audio */}
       <audio ref={audioPreviewRef} controls className={`w-full ${audioBlob ? '' : 'hidden'} mb-5`}></audio>
 
-      {/* Send Button */}
+      {/* Botón de enviar */}
       <button
         onClick={sendData}
         className="w-full bg-indigo-500 text-white py-3 rounded-md flex justify-center"
         disabled={isSending}
       >
-        {isSending ? <span>Sending...</span> : <span>Send Data</span>}
+        {isSending ? <span>Enviando...</span> : <span>Enviar Datos</span>}
       </button>
 
-      {/* Status Messages */}
+      {/* Mensajes de estado */}
       <div className="flex justify-center items-center mb-5">
         <div className="text-center">
           <div className="mb-2 text-blue-800">
-            Audio Status: {audioBlob ? '✅ Recorded' : '❌ Not recorded'}
+            Estado del audio: {audioBlob ? '✅ Grabado' : '❌ No grabado'}
           </div>
         </div>
       </div>

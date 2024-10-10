@@ -143,6 +143,7 @@ export default function TurnoFinal() {
         <ul className="list-disc list-inside">
           <li>Consumo de gas final</li>
           <li>Comentario Final</li>
+          <li>Despedida</li>
         </ul>
       </div>
 
