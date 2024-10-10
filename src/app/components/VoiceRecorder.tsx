@@ -12,6 +12,7 @@ export default function VoiceRecorder() {
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [countdown, setCountdown] = useState(60); // Inicializar el cronómetro a 60 segundos
+  const [isCountdownActive, setIsCountdownActive] = useState(false); // Nuevo estado para controlar el cronómetro
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
@@ -19,30 +20,26 @@ export default function VoiceRecorder() {
   // Efecto para manejar el cronómetro
   useEffect(() => {
     let timer: number | null = null;
-    let countdownStartTimeout: number | null = null;
 
-    if (isRecording && countdown === 60) {
-      // Retrasar el inicio del cronómetro 3 segundos
-      countdownStartTimeout = window.setTimeout(() => {
-        timer = window.setInterval(() => {
-          setCountdown((prevCountdown) => {
-            if (prevCountdown > 0) {
-              return prevCountdown - 1;
-            } else {
-              if (timer !== null) clearInterval(timer);
-              stopRecording(); // Detener la grabación cuando el cronómetro llegue a 0
-              return 0;
-            }
-          });
-        }, 1000); // Decrementar el cronómetro cada segundo
-      }, 3000); // Iniciar el cronómetro después de 3 segundos
+    if (isCountdownActive && countdown > 0) {
+      timer = window.setInterval(() => {
+        setCountdown((prevCountdown) => {
+          if (prevCountdown > 0) {
+            return prevCountdown - 1;
+          } else {
+            if (timer !== null) clearInterval(timer);
+            stopRecording(); // Detener la grabación cuando el cronómetro llegue a 0
+            setIsCountdownActive(false); // Detener el cronómetro
+            return 0;
+          }
+        });
+      }, 1000); // Decrementar el cronómetro cada segundo
     }
 
     return () => {
       if (timer !== null) clearInterval(timer); // Limpiar el temporizador
-      if (countdownStartTimeout !== null) clearTimeout(countdownStartTimeout); // Limpiar el timeout inicial
     };
-  }, [isRecording, countdown]);
+  }, [isCountdownActive, countdown]);
 
   useEffect(() => {
     if (isRecording && analyser && dataArray) {
@@ -55,6 +52,7 @@ export default function VoiceRecorder() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         setCountdown(60); // Reiniciar el cronómetro al iniciar una nueva grabación
+        setIsCountdownActive(false); // Asegurarse de que el cronómetro no esté activo
         startRecording(stream);
       } catch (err: unknown) {
         console.error('Error accessing microphone:', err);
@@ -95,6 +93,7 @@ export default function VoiceRecorder() {
 
   const stopRecording = () => {
     setIsRecording(false);
+    setIsCountdownActive(false); // Detener el cronómetro si está activo
     if (mediaRecorder) {
       mediaRecorder.stop();
       mediaRecorder.stream.getTracks().forEach((track) => track.stop());
@@ -171,6 +170,14 @@ export default function VoiceRecorder() {
     window.location.reload();
   };
 
+  const startCountdown = () => {
+    if (!isRecording) {
+      alert('Por favor, inicia la grabación antes de iniciar el cronómetro.');
+      return;
+    }
+    setIsCountdownActive(true);
+  };
+
   return (
     <div>
       {/* Icono de Inicio para Recargar */}
@@ -228,8 +235,28 @@ export default function VoiceRecorder() {
         </ul>
       </div>
 
+      {/* Botón para iniciar el cronómetro */}
+      <div className="flex justify-center mb-5">
+        <button
+          onClick={startCountdown}
+          className="bg-blue-500 text-white py-2 px-4 rounded-md flex items-center"
+          disabled={!isRecording || isCountdownActive}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
+          </svg>
+          Iniciar Cronómetro
+        </button>
+      </div>
+
       {/* Cronómetro */}
-      {isRecording && (
+      {isCountdownActive && (
         <div className="mb-5 text-center text-red-600">
           <h3 className="text-lg font-semibold">Tiempo restante: {countdown} segundos</h3>
         </div>
