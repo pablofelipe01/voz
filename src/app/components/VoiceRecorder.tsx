@@ -6,40 +6,41 @@ import confetti from 'canvas-confetti';
 export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [number, setNumber] = useState(''); // Estado para almacenar el número
+  const [number, setNumber] = useState('');
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [countdown, setCountdown] = useState(60); // Inicializar el cronómetro a 60 segundos
-  const [isCountdownActive, setIsCountdownActive] = useState(false); // Nuevo estado para controlar el cronómetro
+  const [countdown, setCountdown] = useState(60);
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
+  const timerRef = useRef<number | null>(null); // Usamos useRef para el intervalo
 
   // Efecto para manejar el cronómetro
   useEffect(() => {
-    let timer: number | null = null;
-
-    if (isCountdownActive && countdown > 0) {
-      timer = window.setInterval(() => {
+    if (isCountdownActive && timerRef.current === null) {
+      timerRef.current = window.setInterval(() => {
         setCountdown((prevCountdown) => {
-          if (prevCountdown > 0) {
+          if (prevCountdown > 1) {
             return prevCountdown - 1;
           } else {
-            if (timer !== null) clearInterval(timer);
             stopRecording(); // Detener la grabación cuando el cronómetro llegue a 0
-            setIsCountdownActive(false); // Detener el cronómetro
+            setIsCountdownActive(false);
             return 0;
           }
         });
-      }, 1000); // Decrementar el cronómetro cada segundo
+      }, 1000);
     }
 
     return () => {
-      if (timer !== null) clearInterval(timer); // Limpiar el temporizador
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [isCountdownActive, countdown]);
+  }, [isCountdownActive]); // Solo depende de isCountdownActive
 
   useEffect(() => {
     if (isRecording && analyser && dataArray) {
@@ -97,6 +98,11 @@ export default function VoiceRecorder() {
     if (mediaRecorder) {
       mediaRecorder.stop();
       mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+    }
+    // Limpiar el intervalo
+    if (timerRef.current !== null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
   };
 
