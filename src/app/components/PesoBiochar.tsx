@@ -167,7 +167,7 @@ export default function PesoBiochar() {
       <div className="mb-5 text-center text-blue-900">
         <h3 className="text-lg font-semibold">Instrucciones:</h3>
         <ul className="list-disc list-inside">
-          <li>Decir solo el peso de biochar en kilos</li>
+          <li>Decir solo el peso de biochar en kilos cuando la lona este full</li>
         
         </ul>
       </div>
