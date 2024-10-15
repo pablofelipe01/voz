@@ -234,7 +234,7 @@ export default function VoiceRecorder() {
         <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Instrucciones:</h1>
         <ul className="list-disc list-inside">
           <li>Saludo</li>
-          <li>Comentario</li>
+        
           <li>Consumo de gas Inicial</li>
           <li>Hertz</li>
           <li>Peso por Minuto</li>
