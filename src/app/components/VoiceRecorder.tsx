@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -11,36 +12,11 @@ export default function VoiceRecorder() {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [countdown, setCountdown] = useState(60);
-  const [isCountdownActive, setIsCountdownActive] = useState(false);
+
+  
 
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const waveBars = useRef<HTMLDivElement[]>([]);
-  const timerRef = useRef<number | null>(null); // Usamos useRef para el intervalo
-
-  // Efecto para manejar el cronómetro
-  useEffect(() => {
-    if (isCountdownActive && timerRef.current === null) {
-      timerRef.current = window.setInterval(() => {
-        setCountdown((prevCountdown) => {
-          if (prevCountdown > 1) {
-            return prevCountdown - 1;
-          } else {
-            stopRecording(); // Detener la grabación cuando el cronómetro llegue a 0
-            setIsCountdownActive(false);
-            return 0;
-          }
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (timerRef.current !== null) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [isCountdownActive]); // Solo depende de isCountdownActive
 
   useEffect(() => {
     if (isRecording && analyser && dataArray) {
@@ -52,8 +28,6 @@ export default function VoiceRecorder() {
     if (!isRecording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        setCountdown(60); // Reiniciar el cronómetro al iniciar una nueva grabación
-        setIsCountdownActive(false); // Asegurarse de que el cronómetro no esté activo
         startRecording(stream);
       } catch (err: unknown) {
         console.error('Error accessing microphone:', err);
@@ -94,15 +68,9 @@ export default function VoiceRecorder() {
 
   const stopRecording = () => {
     setIsRecording(false);
-    setIsCountdownActive(false); // Detener el cronómetro si está activo
     if (mediaRecorder) {
       mediaRecorder.stop();
       mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-    }
-    // Limpiar el intervalo
-    if (timerRef.current !== null) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
     }
   };
 
@@ -121,67 +89,24 @@ export default function VoiceRecorder() {
     }
   };
 
-  const sendData = async () => {
+  const downloadAudio = () => {
     if (!audioBlob) {
-      alert('Por favor, graba audio antes de enviar.');
+      alert('Por favor, graba audio antes de descargar.');
       return;
     }
 
-    if (!number) {
-      alert('Por favor, selecciona un operador.');
-      return;
-    }
-
-    setIsSending(true);
-
-    const formData = new FormData();
-    formData.append('number', number); // Agregar número al FormData
-    if (audioBlob) {
-      formData.append('audio', audioBlob, 'recording.ogg');
-    }
-
-    try {
-      const response = await fetch('https://hook.us2.make.com/nip7vj86ndf2vv1t7r6jw6yoky18u4t7', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const responseText = await response.text();
-
-      if (response.ok) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-        alert('¡Datos enviados exitosamente!');
-        setAudioBlob(null);
-        setNumber('');
-        if (audioPreviewRef.current) audioPreviewRef.current.style.display = 'none';
-      } else {
-        throw new Error(`El servidor respondió con estado: ${response.status}. Respuesta: ${responseText}`);
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        alert(`Error al enviar datos. Por favor, intenta de nuevo. Error: ${error.message}`);
-      } else {
-        alert('Error al enviar datos. Por favor, intenta de nuevo.');
-      }
-    } finally {
-      setIsSending(false);
-    }
+    const url = URL.createObjectURL(audioBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'recording.ogg'; // Set the filename
+    document.body.appendChild(link);
+    link.click(); // Trigger the download
+    document.body.removeChild(link); // Clean up the DOM
+    URL.revokeObjectURL(url); // Release the object URL
   };
 
   const reloadPage = () => {
     window.location.reload();
-  };
-
-  const startCountdown = () => {
-    if (!isRecording) {
-      alert('Por favor, inicia la grabación antes de iniciar el cronómetro.');
-      return;
-    }
-    setIsCountdownActive(true);
   };
 
   return (
@@ -234,39 +159,11 @@ export default function VoiceRecorder() {
         <h1 className="text-2xl font-semibold text-center mb-5 text-blue-800">Instrucciones:</h1>
         <ul className="list-disc list-inside">
           <li>Saludo</li>
-        
           <li>Consumo de gas Inicial</li>
           <li>Hertz</li>
           <li>Peso por Minuto</li>
         </ul>
       </div>
-
-      {/* Botón para iniciar el cronómetro */}
-      <div className="flex justify-center mb-5">
-        <button
-          onClick={startCountdown}
-          className="bg-blue-500 text-white py-2 px-4 rounded-md flex items-center"
-          disabled={!isRecording || isCountdownActive}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
-          </svg>
-          Iniciar Cronómetro
-        </button>
-      </div>
-
-      {/* Cronómetro */}
-      {isCountdownActive && (
-        <div className="mb-5 text-center text-red-600">
-          <h3 className="text-lg font-semibold">Tiempo restante: {countdown} segundos</h3>
-        </div>
-      )}
 
       {/* Animación de la onda de grabación */}
       <div className="flex justify-center items-center mb-5">
@@ -296,13 +193,12 @@ export default function VoiceRecorder() {
       {/* Vista previa de audio */}
       <audio ref={audioPreviewRef} controls className={`w-full ${audioBlob ? '' : 'hidden'} mb-5`}></audio>
 
-      {/* Botón de enviar */}
+      {/* Botón de descargar */}
       <button
-        onClick={sendData}
+        onClick={downloadAudio}
         className="w-full bg-indigo-500 text-white py-3 rounded-md flex justify-center"
-        disabled={isSending}
       >
-        {isSending ? <span>Enviando...</span> : <span>Enviar Datos</span>}
+        Descargar Audio
       </button>
 
       {/* Mensajes de estado */}

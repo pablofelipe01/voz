@@ -12,6 +12,7 @@
     "canvas-confetti": "^1.9.3",
     "dotenv": "^16.4.5",
     "dropbox": "^10.34.0",
+    "lamejs": "^1.2.1",
     "next": "14.2.11",
     "node-fetch": "^2.7.0",
     "query-string": "^9.1.0",
